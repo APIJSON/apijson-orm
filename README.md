@@ -1,4 +1,4 @@
-# apijson-orm
+# apijson-orm  [![](https://jitpack.io/v/APIJSON/apijson-orm.svg)](https://jitpack.io/#APIJSON/apijson-orm)
 APIJSON ORM remote dependencies.
 
 ### Maven
