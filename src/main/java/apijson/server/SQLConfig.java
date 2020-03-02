@@ -49,8 +49,8 @@ public interface SQLConfig {
 	//	boolean isPLSQL();
 	//	boolean isTransactSQL();
 
-	boolean limitSQLCount(); //用来给 Table, Column 等系统属性表来绕过 MAX_SQL_COUNT 等限制
-
+	boolean limitSQLCount(); //用来给 Table, Column 等系统属性表来绕过 MAX_SQL_COUNT 等限制 
+	
 	@NotNull
 	String getIdKey();
 	@NotNull
@@ -157,7 +157,7 @@ public interface SQLConfig {
 
 	List<String> getJson();
 	SQLConfig setJson(List<String> json);
-
+	
 	Subquery getFrom();
 	SQLConfig setFrom(Subquery from);
 

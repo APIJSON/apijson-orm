@@ -23,5 +23,5 @@ import apijson.MethodAccess;
 public class PgAttribute {
 	public static final String TAG = "PgAttribute";
 	public static final String TABLE_NAME = "pg_attribute";
-
+	
 }

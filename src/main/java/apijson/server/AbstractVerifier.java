@@ -202,7 +202,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T> {
 
 			if (requestIdArray == null) {//可能是@得到 || requestIdArray.isEmpty()) {//请求未声明key:id或key{}:[...]条件，自动补全
 				config.putWhere(visitorIdkey+"{}", JSON.parseArray(list), true); //key{}:[]有效，SQLConfig里throw NotExistException
-			}
+			} 
 			else {//请求已声明key:id或key{}:[]条件，直接验证
 				for (Object id : requestIdArray) {
 					if (id == null) {
@@ -285,8 +285,8 @@ public abstract class AbstractVerifier<T> implements Verifier<T> {
 	 * @param method
 	 * @param role
 	 * @return
-	 * @throws Exception
-	 * @see {@link apijson.JSONObject#KEY_ROLE}
+	 * @throws Exception 
+	 * @see {@link apijson.JSONObject#KEY_ROLE} 
 	 */
 	public void verifyRole(String table, RequestMethod method, RequestRole role) throws Exception {
 		Log.d(TAG, "verifyRole  table = " + table + "; method = " + method + "; role = " + role);
@@ -322,7 +322,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T> {
 			if (((Number) visitorId).longValue() <= 0) {
 				throw new NotLoggedInException("未登录，请登录后再操作！");
 			}
-		}
+		} 
 		else if (visitorId instanceof String) {
 			if (StringUtil.isEmpty(visitorId, true)) {
 				throw new NotLoggedInException("未登录，请登录后再操作！");

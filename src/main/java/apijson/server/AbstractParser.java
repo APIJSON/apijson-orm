@@ -450,7 +450,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	/**解析请求JSONObject
 	 * @param request => URLDecoder.decode(request, UTF_8);
 	 * @return
-	 * @throws Exception
+	 * @throws Exception 
 	 */
 	@NotNull
 	public static JSONObject parseRequest(String request) throws Exception {
@@ -464,7 +464,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	@Override
 	public JSONObject parseCorrectRequest(RequestMethod method, String tag, int version, String name, @NotNull JSONObject request
 			, int maxUpdateCount, SQLCreator creator) throws Exception {
-
+		
 		if (RequestMethod.isPublicMethod(method)) {
 			return request;//需要指定JSON结构的get请求可以改为post请求。一般只有对安全性要求高的才会指定，而这种情况用明文的GET方式几乎肯定不安全
 		}
@@ -561,7 +561,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 			int code;
 			if (e instanceof UnsupportedEncodingException) {
 				code = JSONResponse.CODE_UNSUPPORTED_ENCODING;
-			}
+			} 
 			else if (e instanceof IllegalAccessException) {
 				code = JSONResponse.CODE_ILLEGAL_ACCESS;
 			}
@@ -579,7 +579,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 			}
 			else if (e instanceof TimeoutException) {
 				code = JSONResponse.CODE_TIME_OUT;
-			}
+			} 
 			else if (e instanceof ConflictException) {
 				code = JSONResponse.CODE_CONFLICT;
 			}
@@ -613,7 +613,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	 * @param method
 	 * @param request
 	 * @return
-	 * @throws Exception
+	 * @throws Exception 
 	 */
 	@Override
 	public JSONObject parseCorrectRequest() throws Exception {
@@ -630,7 +630,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	 * @param method
 	 * @param response
 	 * @return
-	 * @throws Exception
+	 * @throws Exception 
 	 */
 	@Override
 	public JSONObject parseCorrectResponse(String table, JSONObject response) throws Exception {
@@ -697,7 +697,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	 * @param request parentObject的value
 	 * @param config for array item
 	 * @return
-	 * @throws Exception
+	 * @throws Exception 
 	 */
 	@Override
 	public JSONObject onObjectParse(final JSONObject request
@@ -778,7 +778,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	 * @param parentPath parentObject的路径
 	 * @param name parentObject的key
 	 * @param request parentObject的value
-	 * @return
+	 * @return 
 	 * @throws Exception
 	 */
 	@Override
@@ -925,8 +925,8 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	/**多表同时筛选
 	 * @param join "&/User/id@,</User[]/User/id{}@,</[]/Comment/momentId@"
 	 * @param request
-	 * @return
-	 * @throws Exception
+	 * @return 
+	 * @throws Exception 
 	 */
 	private List<Join> onJoinParse(Object join, JSONObject request) throws Exception {
 		JSONObject joinMap = null;
@@ -1075,7 +1075,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	 * @param table
 	 * @param key
 	 * @param obj
-	 * @param targetKey
+	 * @param targetKey 
 	 * @return null ? 全部 : 有限的数组
 	 */
 	private JSONObject getJoinObject(String table, JSONObject obj, String key) {
@@ -1237,7 +1237,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 					pos = ps[i+1].contains("/") == false ? ps[i+1]
 							: ps[i+1].substring(0, ps[i+1].indexOf("/"));
 					if (
-							//StringUtil.isNumer(pos) &&
+							//StringUtil.isNumer(pos) && 
 							vs[i+1].startsWith(pos + "/") == false) {
 						vs[i+1] = pos + "/" + vs[i+1];
 					}

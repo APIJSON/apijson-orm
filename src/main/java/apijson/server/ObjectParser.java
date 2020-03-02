@@ -74,20 +74,27 @@ public interface ObjectParser {
 	 * @throws Exception
 	 */
 	JSON onChildParse(int index, String key, JSONObject value) throws Exception;
-
+	
 	/**解析赋值引用
 	 * @param path
 	 * @return
 	 */
 	Object onReferenceParse(@NotNull String path);
 
-	//TODO 改用 MySQL json_add,json_remove,json_contains 等函数！
-	/**PUT key:[]
+	//TODO 改用 MySQL json_add,json_remove,json_contains 等函数！ 
+	/**修改数组 PUT key:[]
 	 * @param key
 	 * @param array
 	 * @throws Exception
 	 */
 	void onPUTArrayParse(@NotNull String key, @NotNull JSONArray array) throws Exception;
+
+	/**批量新增或修改 POST or PUT  Table[]:[{}]
+	 * @param key
+	 * @param array
+	 * @throws Exception
+	 */
+	void onTableArrayParse(@NotNull String key, @NotNull JSONArray array) throws Exception;
 
 	/**SQL 配置，for single object
 	 * @return {@link #setSQLConfig(int, int, int)}
@@ -96,26 +103,26 @@ public interface ObjectParser {
 	ObjectParser setSQLConfig() throws Exception;
 
 	/**SQL 配置
-	 * @return
+	 * @return 
 	 * @throws Exception
 	 */
 	ObjectParser setSQLConfig(int count, int page, int position) throws Exception;
-
-
+	
+	
 	/**执行 SQL
-	 * @return
+	 * @return 
 	 * @throws Exception
 	 */
 	ObjectParser executeSQL() throws Exception;
 
-
+	
 	/**
 	 * @return
 	 * @throws Exception
 	 */
 	JSONObject onSQLExecute() throws Exception;
-
-
+	
+	
 	/**
 	 * @return response
 	 * @throws Exception
@@ -125,11 +132,11 @@ public interface ObjectParser {
 	void onFunctionResponse(String type) throws Exception;
 
 	void onChildResponse() throws Exception;
-
+	
 
 	SQLConfig newSQLConfig(boolean isProcedure) throws Exception;
 	SQLConfig newSQLConfig(RequestMethod method, String table, String alias, JSONObject request, List<Join> joinList, boolean isProcedure) throws Exception;
-
+	
 	/**
 	 * response has the final value after parse (and query if isTableKey)
 	 */
@@ -160,6 +167,5 @@ public interface ObjectParser {
 	Map<String, Object> getCustomMap();
 	Map<String, Map<String, String>> getFunctionMap();
 	Map<String, JSONObject> getChildMap();
-
 
 }

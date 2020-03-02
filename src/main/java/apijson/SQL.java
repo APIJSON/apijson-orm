@@ -25,7 +25,7 @@ public class SQL {
 	public static final String AS = " AS ";
 	public static final String IS = " is ";
 	public static final String NULL = " null ";
-
+	
 	//括号必须紧跟函数名！ count (...) 报错！
 	public static final String COUNT = "count";
 	public static final String SUM = "sum";
@@ -34,7 +34,7 @@ public class SQL {
 	public static final String AVG = "avg";
 
 	/**
-	 * isNull = true
+	 * isNull = true 
 	 * @return {@link #isNull(boolean)}
 	 */
 	public static String isNull() {
@@ -195,7 +195,7 @@ public class SQL {
 	public static String replace(String s, String c1, String c2) {
 		return "replace(" + s + ", " + c1 + ", " + c2 + ")";
 	}
-
+	
 	/**
 	 * @param s1
 	 * @param s2
@@ -229,11 +229,11 @@ public class SQL {
 		return "lower(" + s + ")";
 	}
 
-
-
+	
+	
 
 	//column and function<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
+	
 	/**字段
 	 * @param column
 	 * @return column.isEmpty() ? "*" : column;
@@ -249,7 +249,7 @@ public class SQL {
 	public static String columnAs(String column) {
 		return count(column) + AS;
 	}
-
+	
 	/**函数
 	 * @param column if (StringUtil.isEmpty(column, true) || column.contains(",")) -> column = null;
 	 * @return " " + fun + "(" + {@link #column(String)} + ") ";
@@ -267,7 +267,7 @@ public class SQL {
 	public static String functionAs(String fun, String column) {
 		return function(fun, column) + AS + fun + " ";
 	}
-
+	
 	/**计数
 	 * column = null
 	 * @return {@link #count(String)}
@@ -317,9 +317,9 @@ public class SQL {
 	}
 
 	//column and function>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-
-
+	
+	
+	
 	//search<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 	public static final int SEARCH_TYPE_CONTAIN_FULL = 0;
@@ -392,7 +392,7 @@ public class SQL {
 			return "%" + s + "%";
 		}
 	}
-
+	
 	//search>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 }

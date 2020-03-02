@@ -387,7 +387,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			a = getTable();
 		}
 		String q = getQuote();
-		//getTable 不能小写，因为Verifier用大小写敏感的名称判断权限
+		//getTable 不能小写，因为Verifier用大小写敏感的名称判断权限		
 		//如果要强制小写，则可在子类重写这个方法再 toLowerCase  return q + (DATABASE_POSTGRESQL.equals(getDatabase()) ? a.toLowerCase() : a) + q;
 		return q + a + q;
 	}
@@ -873,7 +873,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						else if (StringUtil.isName(origin)) {
 							origin = quote + origin + quote;
 							isName = true;
-						}
+						} 
 						else {
 							origin = getValue(origin).toString();
 						}
@@ -910,7 +910,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 							throw new IllegalArgumentException("GET请求: 预编译模式下 @column:value 中 value里面用 ; 分割的每一项"
 									+ " function(arg0,arg1,...):alias 中 alias 如果有就必须是1个单词！并且不要有多余的空格！");
 						}
-					}
+					} 
 					else {
 						if (StringUtil.isEmpty(alias, true) == false && StringUtil.isName(alias) == false) {
 							throw new IllegalArgumentException("GET请求: 预编译模式下 @column:value 中 value里面用 ; 分割的每一项"
@@ -1216,7 +1216,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public AbstractSQLConfig putWhere(String key, Object value, boolean prior) {
 		if (key != null) {
 			if (where == null) {
-				where = new LinkedHashMap<String, Object>();
+				where = new LinkedHashMap<String, Object>();	
 			}
 			if (value == null) {
 				where.remove(key);
@@ -1268,7 +1268,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	/**获取WHERE
 	 * @return
-	 * @throws Exception
+	 * @throws Exception 
 	 */
 	@JSONField(serialize = false)
 	@Override
@@ -1279,7 +1279,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @param method
 	 * @param where
 	 * @return
-	 * @throws Exception
+	 * @throws Exception 
 	 */
 	@JSONField(serialize = false)
 	public String getWhereString(boolean hasPrefix, RequestMethod method, Map<String, Object> where, Map<String, List<String>> combine, List<Join> joinList, boolean verifyName) throws Exception {
@@ -1360,9 +1360,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				case ">": // RIGHT JOIN
 					break;
 
-				case "":  // FULL JOIN
+				case "":  // FULL JOIN 
 				case "|": // FULL JOIN  不支持 <>, [] ，避免太多符号
-				case "&": // INNER JOIN
+				case "&": // INNER JOIN 
 				case "!": // OUTTER JOIN
 				case "^": // SIDE JOIN
 				case "*": // CROSS JOIN
@@ -1395,7 +1395,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 						newWs += " ( "
 								+ getCondition(
-										Logic.isNot(logic),
+										Logic.isNot(logic), 
 										ws
 										+ ( StringUtil.isEmpty(ws, true) ? "" : (Logic.isAnd(logic) ? AND : OR) )
 										+ " ( " + js + " ) "
@@ -1453,8 +1453,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		int keyType;
 		if (key.endsWith("$")) {
 			keyType = 1;
-		}
-		else if (key.endsWith("~") || key.endsWith("?")) { //TODO ？可能以后会被废弃，全用 ~ 和 *~ 替代，更接近 PostgreSQL 语法
+		} 
+		else if (key.endsWith("~") || key.endsWith("?")) { //TODO ？可能以后会被废弃，全用 ~ 和 *~ 替代，更接近 PostgreSQL 语法 
 			keyType = key.charAt(key.length() - 2) == '*' ? -2 : 2;  //FIXME StringIndexOutOfBoundsException
 		}
 		else if (key.endsWith("%")) {
@@ -1520,7 +1520,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			throw new IllegalArgumentException(key + ":value 中value不合法！非PUT请求只支持 [Boolean, Number, String] 内的类型 ！");
 		}
 
-		boolean not = key.endsWith("!"); // & | 没有任何意义，写法多了不好控制
+		boolean not = key.endsWith("!"); // & | 没有任何意义，写法多了不好控制 
 		if (not) {
 			key = key.substring(0, key.length() - 1);
 		}
@@ -1575,7 +1575,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	/**search key match value
 	 * @param in
 	 * @return {@link #getSearchString(String, Object[], int)}
-	 * @throws IllegalArgumentException
+	 * @throws IllegalArgumentException 
 	 */
 	@JSONField(serialize = false)
 	public String getSearchString(String key, Object value) throws IllegalArgumentException {
@@ -1596,7 +1596,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	/**search key match values
 	 * @param in
 	 * @return LOGIC [  key LIKE 'values[i]' ]
-	 * @throws IllegalArgumentException
+	 * @throws IllegalArgumentException 
 	 */
 	@JSONField(serialize = false)
 	public String getSearchString(String key, Object[] values, int type) throws IllegalArgumentException {
@@ -1633,9 +1633,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	/**search key match RegExp values
 	 * @param key
 	 * @param value
-	 * @param ignoreCase
+	 * @param ignoreCase 
 	 * @return {@link #getRegExpString(String, Object[], int, boolean)}
-	 * @throws IllegalArgumentException
+	 * @throws IllegalArgumentException 
 	 */
 	@JSONField(serialize = false)
 	public String getRegExpString(String key, Object value, boolean ignoreCase) throws IllegalArgumentException {
@@ -1656,10 +1656,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	/**search key match RegExp values
 	 * @param key
 	 * @param values
-	 * @param type
-	 * @param ignoreCase
+	 * @param type 
+	 * @param ignoreCase 
 	 * @return LOGIC [  key REGEXP 'values[i]' ]
-	 * @throws IllegalArgumentException
+	 * @throws IllegalArgumentException 
 	 */
 	@JSONField(serialize = false)
 	public String getRegExpString(String key, Object[] values, int type, boolean ignoreCase) throws IllegalArgumentException {
@@ -1704,7 +1704,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @param key
 	 * @param value 'start,end'
 	 * @return LOGIC [ key BETWEEN 'start' AND 'end' ]
-	 * @throws IllegalArgumentException
+	 * @throws IllegalArgumentException 
 	 */
 	@JSONField(serialize = false)
 	public String getBetweenString(String key, Object value) throws IllegalArgumentException {
@@ -1727,7 +1727,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @param key
 	 * @param value 'start,end' TODO 在 '1,2' 和 ['1,2', '3,4'] 基础上新增支持 [1, 2] 和 [[1,2], [3,4]] ？
 	 * @return LOGIC [ key BETWEEN 'start' AND 'end' ]
-	 * @throws IllegalArgumentException
+	 * @throws IllegalArgumentException 
 	 */
 	@JSONField(serialize = false)
 	public String getBetweenString(String key, Object[] values, int type) throws IllegalArgumentException {
@@ -1757,7 +1757,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @param key
 	 * @param value 'start,end' TODO 在 '1,2' 和 ['1,2', '3,4'] 基础上新增支持 [1, 2] 和 [[1,2], [3,4]] ？
 	 * @return key BETWEEN 'start' AND 'end'
-	 * @throws IllegalArgumentException
+	 * @throws IllegalArgumentException 
 	 */
 	@JSONField(serialize = false)
 	public String getBetweenString(String key, Object start, Object end) throws IllegalArgumentException {
@@ -1791,7 +1791,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @param key
 	 * @param range "condition0,condition1..."
 	 * @return key condition0 AND key condition1 AND ...
-	 * @throws Exception
+	 * @throws Exception 
 	 */
 	@JSONField(serialize = false)
 	public String getRangeString(String key, Object range) throws Exception {
@@ -1856,7 +1856,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	/**WHERE key IN ('key0', 'key1', ... )
 	 * @param in
 	 * @return IN ('key0', 'key1', ... )
-	 * @throws NotExistException
+	 * @throws NotExistException 
 	 */
 	@JSONField(serialize = false)
 	public String getInString(String key, Object[] in, boolean not) throws NotExistException {
@@ -1926,7 +1926,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @param type |, &, !
 	 * @return LOGIC [  ( key LIKE '[" + childs[i] + "]'  OR  key LIKE '[" + childs[i] + ", %'
 	 *   OR  key LIKE '%, " + childs[i] + ", %'  OR  key LIKE '%, " + childs[i] + "]' )  ]
-	 * @throws IllegalArgumentException
+	 * @throws IllegalArgumentException 
 	 */
 	@JSONField(serialize = false)
 	public String getContainString(String key, Object[] childs, int type) throws IllegalArgumentException {
@@ -1941,7 +1941,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 					condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR));
 					if (isPostgreSQL()) {
-						condition += (getKey(key) + " @> " + getValue(newJSONArray(childs[i]))); //operator does not exist: jsonb @> character varying  "[" + childs[i] + "]");
+						condition += (getKey(key) + " @> " + getValue(newJSONArray(childs[i]))); //operator does not exist: jsonb @> character varying  "[" + childs[i] + "]"); 
 					}
 					else if (isOracle()) {
 						condition += ("json_textcontains(" + getKey(key) + ", '$', " + getValue(childs[i].toString()) + ")");
@@ -2018,7 +2018,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	//SET <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	/**获取SET
 	 * @return
-	 * @throws Exception
+	 * @throws Exception 
 	 */
 	@JSONField(serialize = false)
 	public String getSetString() throws Exception {
@@ -2028,7 +2028,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @param method
 	 * @param content
 	 * @return
-	 * @throws Exception
+	 * @throws Exception 
 	 */
 	@JSONField(serialize = false)
 	public String getSetString(RequestMethod method, Map<String, Object> content, boolean verifyName) throws Exception {
@@ -2107,7 +2107,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	/**
 	 * @return
-	 * @throws Exception
+	 * @throws Exception 
 	 */
 	@JSONField(serialize = false)
 	@Override
@@ -2117,7 +2117,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	/**
 	 * @param config
 	 * @return
-	 * @throws Exception
+	 * @throws Exception 
 	 */
 	public static String getSQL(AbstractSQLConfig config) throws Exception {
 		if (config == null) {
@@ -2156,12 +2156,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 
 	/**获取条件SQL字符串
-	 * @param page
+	 * @param page 
 	 * @param column
 	 * @param table
 	 * @param where
 	 * @return
-	 * @throws Exception
+	 * @throws Exception 
 	 */
 	private static String getConditionString(String column, String table, AbstractSQLConfig config) throws Exception {
 		String where = config.getWhereString(true);
@@ -2275,9 +2275,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					changed = true;
 					break;
 
-				case "":  // FULL JOIN
+				case "":  // FULL JOIN 
 				case "|": // FULL JOIN  不支持 <>, [] ，避免太多符号
-				case "&": // INNER JOIN
+				case "&": // INNER JOIN 
 				case "!": // OUTTER JOIN
 				case "^": // SIDE JOIN
 					//场景少且性能差，默认禁用	case "*": // CROSS JOIN
@@ -2309,7 +2309,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @param isProcedure
 	 * @param callback
 	 * @return
-	 * @throws Exception
+	 * @throws Exception 
 	 */
 	public static AbstractSQLConfig newSQLConfig(RequestMethod method, String table, String alias, JSONObject request, List<Join> joinList, boolean isProcedure, Callback callback) throws Exception {
 		if (request == null) { // User:{} 这种空内容在查询时也有效
@@ -2354,7 +2354,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		if (method == POST && request.get(idKey) == null) {
 			Object newId = callback.newId(method, database, schema, table); // null 表示数据库自增 id
-			if (newId != null) {
+			if (newId != null) { 
 				request.put(idKey, newId);
 			}
 		}
@@ -2362,7 +2362,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		//对id和id{}处理，这两个一定会作为条件
 		Object id = request.get(idKey);
 		if (id != null) { //null无效
-			if (id instanceof Number) {
+			if (id instanceof Number) { 
 				if (((Number) id).longValue() <= 0) { //一定没有值
 					throw new NotExistException(TAG + ": newSQLConfig " + table + ".id <= 0");
 				}
@@ -2451,19 +2451,19 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				}
 				else {
 					int size = columns.length + (id == null ? 0 : 1); //以key数量为准
-
+					
 					items = new ArrayList<>(size);
 					items.add(id); //idList.get(i)); //第0个就是id
-
+					
 					for (int j = 1; j < size; j++) {
 						items.add(values[j-1]); //从第1个开始，允许"null"
 					}
 				}
-
+				
 				valuess.add(items);
 				config.setValues(valuess);
 			}
-		}
+		} 
 		else { //非POST操作
 			final boolean isWhere = method != PUT;//除了POST,PUT，其它全是条件！！！
 
@@ -2597,7 +2597,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		config.setFrom(from);
 		config.setDistinct(distinct);
 		config.setColumn(column == null ? null : cs); //解决总是 config.column != null，总是不能得到 *
-		config.setWhere(tableWhere);
+		config.setWhere(tableWhere);					
 
 		config.setId(id);
 		//在	tableWhere 第0个		config.setIdIn(idIn);
@@ -2688,8 +2688,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				}
 			}
 
-			//解决 query: 1/2 查数量时报错
-			/* SELECT  count(*)  AS count  FROM sys.Moment AS Moment
+			//解决 query: 1/2 查数量时报错  
+			/* SELECT  count(*)  AS count  FROM sys.Moment AS Moment  
 			   LEFT JOIN ( SELECT count(*)  AS count FROM sys.Comment ) AS Comment ON Comment.momentId = Moment.id LIMIT 1 OFFSET 0 */
 			if (RequestMethod.isHeadMethod(method, true)) {
 				joinConfig.setMethod(GET); //子查询不能为 SELECT count(*) ，而应该是 SELECT momentId
@@ -2743,7 +2743,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (key.endsWith("$")) {//搜索 LIKE，查询时处理
 			key = key.substring(0, key.length() - 1);
 		}
-		else if (key.endsWith("~") || key.endsWith("?")) {//匹配正则表达式 REGEXP，查询时处理  TODO ？可能以后会被废弃，全用 ~ 和 *~ 替代，更接近 PostgreSQL 语法
+		else if (key.endsWith("~") || key.endsWith("?")) {//匹配正则表达式 REGEXP，查询时处理  TODO ？可能以后会被废弃，全用 ~ 和 *~ 替代，更接近 PostgreSQL 语法 
 			key = key.substring(0, key.length() - 1);
 			if (key.endsWith("*")) {//忽略大小写
 				key = key.substring(0, key.length() - 1);
@@ -2754,16 +2754,16 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 		else if (key.endsWith("{}")) {//被包含 IN，或者说key对应值处于value的范围内。查询时处理
 			key = key.substring(0, key.length() - 2);
-		}
+		} 
 		else if (key.endsWith("}{")) {//被包含 EXISTS，或者说key对应值处于value的范围内。查询时处理
 			key = key.substring(0, key.length() - 2);
-		}
+		} 
 		else if (key.endsWith("<>")) {//包含 json_contains，或者说value处于key对应值的范围内。查询时处理
 			key = key.substring(0, key.length() - 2);
-		}
+		} 
 		else if (key.endsWith("()")) {//方法，查询完后处理，先用一个Map<key,function>保存
 			key = key.substring(0, key.length() - 2);
-		}
+		} 
 		else if (key.endsWith("@")) {//引用，引用对象查询完后处理。fillTarget中暂时不用处理，因为非GET请求都是由给定的id确定，不需要引用
 			key = key.substring(0, key.length() - 1);
 		}
@@ -2783,7 +2783,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			if (method == PUT) {//不为PUT就抛异常
 				key = key.substring(0, key.length() - 1);
 			}
-		}
+		} 
 		else if (key.endsWith("-")) {//缩减，PUT查询时处理
 			if (method == PUT) {//不为PUT就抛异常
 				key = key.substring(0, key.length() - 1);

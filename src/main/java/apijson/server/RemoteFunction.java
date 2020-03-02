@@ -41,7 +41,7 @@ public class RemoteFunction {
 	static {
 		FUNCTION_MAP = new HashMap<>();
 	}
-
+	
 	private final RequestMethod method;
 	private final String tag;
 	private final int version;
@@ -60,7 +60,7 @@ public class RemoteFunction {
 	public int getVersion() {
 		return version;
 	}
-
+	
 	/**反射调用
 	 * @param fun
 	 * @param request
@@ -70,12 +70,12 @@ public class RemoteFunction {
 	public static Object invoke(@NotNull RemoteFunction fun, @NotNull JSONObject request, @NotNull String function) throws Exception {
 
 		FunctionBean fb = parseFunction(function, request, false);
-
+		
 		JSONObject row = FUNCTION_MAP.get(fb.getMethod());
 		if (row == null) {
 			throw new UnsupportedOperationException("不允许调用远程函数 " + fb.getMethod() + " !");
 		}
-
+		
 		int v = row.getIntValue("version");
 		if (fun.getVersion() < v) {
 			throw new UnsupportedOperationException("不允许 version = " + fun.getVersion() + " 的请求调用远程函数 " + fb.getMethod() + " ! 必须满足 version >= " + v + " !");
@@ -91,7 +91,7 @@ public class RemoteFunction {
 		}
 
 		try {
-			return invoke(fun, fb.getMethod(), fb.getTypes(), fb.getValues());
+			return invoke(fun, fb.getMethod(), fb.getTypes(), fb.getValues()); 
 		} catch (Exception e) {
 			if (e instanceof NoSuchMethodException) {
 				throw new IllegalArgumentException("字符 " + function + " 对应的远程函数 " + getFunction(fb.getMethod(), fb.getKeys()) + " 不在后端工程的DemoFunction内！"
@@ -154,7 +154,7 @@ public class RemoteFunction {
 				}
 
 				if (v instanceof Boolean) {
-					types[i] = Boolean.class; //只支持JSON的几种类型
+					types[i] = Boolean.class; //只支持JSON的几种类型 
 				}
 				else if (v instanceof Number) {
 					types[i] = Number.class;
@@ -300,7 +300,7 @@ public class RemoteFunction {
 					s += (i <= 0 ? "" : ",") + (arg instanceof Boolean || arg instanceof Number ? arg : quote + arg + quote);
 				}
 			}
-
+			
 			return s + ")";
 		}
 

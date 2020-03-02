@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import apijson.server.JSONRequest;
+
 /**use this class instead of com.alibaba.fastjson.JSONObject
  * @author Lemon
  * @see #put
@@ -77,6 +79,13 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 */
 	public static boolean isTableKey(String key) {
 		return StringUtil.isBigName(key);
+	}
+	/**判断是否为对应Table数组的 key
+	 * @param key
+	 * @return
+	 */
+	public static boolean isTableArray(String key) {
+		return isArrayKey(key) && isTableKey(key.substring(0, key.length() - KEY_ARRAY.length()));
 	}
 	//judge >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -332,7 +341,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public JSONObject setJSON(String keys) {
 		return puts(KEY_JSON, keys);
 	}
-
+	
 
 	//JSONObject内关键词 key >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -433,7 +442,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	}
 	/**put and return this
 	 * @param key
-	 * @param value
+	 * @param value 
 	 * @return this
 	 * @see {@link #put(String, Object)}
 	 */

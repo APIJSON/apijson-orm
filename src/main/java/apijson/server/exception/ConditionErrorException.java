@@ -19,7 +19,7 @@ package apijson.server.exception;
  */
 public class ConditionErrorException extends Exception {
 	private static final long serialVersionUID = 1L;
-
+	
 	public ConditionErrorException(String msg) {
 		super(msg);
 	}
@@ -29,5 +29,5 @@ public class ConditionErrorException extends Exception {
 	public ConditionErrorException(String msg, Throwable t) {
 		super(msg, t);
 	}
-
+	
 }

@@ -36,8 +36,8 @@ public interface Verifier<T> {
 	 * @param method
 	 * @param role
 	 * @return
-	 * @throws Exception
-	 * @see {@link apijson.JSONObject#KEY_ROLE}
+	 * @throws Exception 
+	 * @see {@link apijson.JSONObject#KEY_ROLE} 
 	 */
 	void verifyRole(String table, RequestMethod method, RequestRole role) throws Exception;
 
@@ -61,7 +61,7 @@ public interface Verifier<T> {
 	 * @throws Exception
 	 */
 	void verifyRepeat(String table, String key, Object value) throws Exception;
-
+	
 	/**验证是否重复
 	 * @param table
 	 * @param key
@@ -70,17 +70,17 @@ public interface Verifier<T> {
 	 * @throws Exception
 	 */
 	void verifyRepeat(String table, String key, Object value, long exceptId) throws Exception;
-
+	
 
 	@NotNull
 	Parser<T> createParser();
-
+	
 
 	@NotNull
 	Visitor<T> getVisitor();
 	Verifier<T> setVisitor(@NotNull Visitor<T> visitor);
 
-
+	
 	String getVisitorIdKey(SQLConfig config);
 
 }

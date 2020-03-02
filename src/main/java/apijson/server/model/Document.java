@@ -26,7 +26,7 @@ import apijson.MethodAccess;
  * @author Lemon
  */
 @MethodAccess(
-		GET = { LOGIN, ADMIN },
+		GET = { LOGIN, ADMIN }, 
 		HEAD = { LOGIN, ADMIN },
 		PUT = { LOGIN, ADMIN }
 		)

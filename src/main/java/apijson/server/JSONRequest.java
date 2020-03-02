@@ -26,7 +26,7 @@ import apijson.StringUtil;
  */
 public class JSONRequest extends apijson.JSONRequest {
 	private static final long serialVersionUID = 1L;
-
+	
 	public JSONRequest() {
 		super();
 	}
@@ -46,8 +46,8 @@ public class JSONRequest extends apijson.JSONRequest {
 		super(name, object);
 	}
 
-
-
+	
+	
 	@Override
 	public JSONRequest putsAll(Map<? extends String, ? extends Object> map) {
 		super.putsAll(map);

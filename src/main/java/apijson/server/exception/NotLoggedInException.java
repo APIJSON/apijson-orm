@@ -29,5 +29,5 @@ public class NotLoggedInException extends Exception {
 	public NotLoggedInException(Throwable t) {
 		super(t);
 	}
-
+	
 }

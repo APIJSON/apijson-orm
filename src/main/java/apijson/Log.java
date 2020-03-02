@@ -20,7 +20,7 @@ package apijson;
 public class Log {
 
 	public static boolean DEBUG = true;
-
+	
 	/**
 	 * @param TAG
 	 * @param msg

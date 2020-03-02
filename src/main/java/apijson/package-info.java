@@ -13,10 +13,10 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 
 /**
- * the same files for server and client projects
+ * the same files for server and client projects 
  */
 /**
  * @author Lemon
- *
+ * 
  */
 package apijson;

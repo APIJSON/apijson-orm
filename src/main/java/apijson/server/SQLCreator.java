@@ -20,7 +20,7 @@ import apijson.NotNull;
  * @author Lemon
  */
 public interface SQLCreator {
-
+	
 	@NotNull
 	SQLConfig createSQLConfig();
 

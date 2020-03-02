@@ -100,7 +100,7 @@ public class Logic {
 	public static boolean isNot(int type) {
 		return type == TYPE_NOT;
 	}
-
+	
 	public boolean isCorrect() {
 		return isContain(getType());
 	}

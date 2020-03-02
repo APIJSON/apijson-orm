@@ -123,7 +123,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		//只要map不为null，则如果 list.get(position) == null，则返回 {} ，避免再次SQL查询
 		if (list == null) {
 			return null;
-		}
+		} 
 		JSONObject result = position >= list.size() ? null : list.get(position);
 		return result != null ? result : new JSONObject();
 	}
@@ -241,7 +241,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					return result;
 				}
 
-				rs = executeQuery(config);  //FIXME SQL Server 是一次返回两个结果集，包括查询结果和执行计划，需要 moreResults
+				rs = executeQuery(config);  //FIXME SQL Server 是一次返回两个结果集，包括查询结果和执行计划，需要 moreResults 
 
 				if (config.isExplain() == false) { //只有 SELECT 才能 EXPLAIN
 					executedSQLCount ++;
@@ -352,7 +352,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	 * @param config
 	 * @param resultList
 	 * @param childMap
-	 * @throws Exception
+	 * @throws Exception 
 	 */
 	protected void executeAppJoin(SQLConfig config, List<JSONObject> resultList, Map<String, JSONObject> childMap) throws Exception {
 		List<Join> joinList = config.getJoinList();
@@ -454,13 +454,13 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 
 	/**table.put(rsmd.getColumnLabel(i), rs.getObject(i));
-	 * @param config
+	 * @param config 
 	 * @param rs
 	 * @param rsmd
 	 * @param tablePosition 从0开始
 	 * @param table
 	 * @param columnIndex 从1开始
-	 * @param childMap
+	 * @param childMap 
 	 * @return result
 	 * @throws Exception
 	 */
@@ -524,7 +524,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	}
 
 	/**resultList.put(position, table);
-	 * @param config
+	 * @param config 
 	 * @param rs
 	 * @param rsmd
 	 * @param resultList
@@ -577,12 +577,12 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		else if (value instanceof Clob) { //SQL Server TEXT 类型 居然走这个
 			castToJson = true;
 
-			StringBuffer sb = new StringBuffer();
-			BufferedReader br = new BufferedReader(((Clob) value).getCharacterStream());
+			StringBuffer sb = new StringBuffer(); 
+			BufferedReader br = new BufferedReader(((Clob) value).getCharacterStream()); 
 			String s = br.readLine();
 			while (s != null) {
-				sb.append(s);
-				s = br.readLine();
+				sb.append(s); 
+				s = br.readLine(); 
 			}
 			value = sb.toString();
 		}
@@ -604,8 +604,8 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 
 	/**判断是否为JSON类型
-	 * @param config
-	 * @param lable
+	 * @param config 
+	 * @param lable 
 	 * @param rsmd
 	 * @param position
 	 * @return
@@ -631,7 +631,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 
 	/**
-	 * @param config
+	 * @param config 
 	 * @return
 	 * @throws Exception
 	 */
@@ -804,14 +804,14 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	public int executeUpdate(@NotNull SQLConfig config) throws Exception {
 		PreparedStatement s = getStatement(config);
 		int count = s.executeUpdate(); //PreparedStatement 不用传 SQL
-
+		
 		if (config.getMethod() == RequestMethod.POST && config.getId() == null) { //自增id
 			ResultSet rs = s.getGeneratedKeys();
 			if (rs != null && rs.next()) {
 				config.setId(rs.getLong(1));//返回插入的主键id
 			}
 		}
-
+		
 		return count;
 	}
 

@@ -37,8 +37,8 @@ public interface Parser<T> {
 	int MAX_OBJECT_COUNT = 5;
 	int MAX_ARRAY_COUNT = 5;
 	int MAX_QUERY_DEPTH = 5;
-
-
+	
+	
 	@NotNull
 	Visitor<T> getVisitor();
 	Parser<T> setVisitor(@NotNull Visitor<T> visitor);
@@ -49,7 +49,7 @@ public interface Parser<T> {
 
 	int getVersion();
 	Parser<T> setVersion(int version);
-
+	
 	String getTag();
 	Parser<T> setTag(String tag);
 
@@ -68,7 +68,7 @@ public interface Parser<T> {
 	boolean isNoVerifyContent();
 	Parser<T> setNoVerifyContent(boolean noVerifyContent);
 
-
+	
 	@NotNull
 	Verifier<T> createVerifier();
 
@@ -89,10 +89,10 @@ public interface Parser<T> {
 
 
 	JSONObject parseCorrectRequest() throws Exception;
-
+	
 	JSONObject parseCorrectRequest(RequestMethod method, String tag, int version, String name, JSONObject request,
 			int maxUpdateCount, SQLCreator creator) throws Exception;
-
+	
 	JSONObject parseCorrectResponse(String table, JSONObject response) throws Exception;
 
 	JSONObject getStructure(String table, String key, String value, int version) throws Exception;
@@ -110,7 +110,7 @@ public interface Parser<T> {
 	 * @throws Exception
 	 */
 	Object onFunctionParse(JSONObject object, String function) throws Exception;
-
+	
 	ObjectParser createObjectParser(JSONObject request, String parentPath, String name, SQLConfig arrayConfig, boolean isSubquery) throws Exception;
 
 	int getDefaultQueryCount();
@@ -121,7 +121,7 @@ public interface Parser<T> {
 	int getMaxObjectCount();
 	int getMaxArrayCount();
 	int getMaxQueryDepth();
-
+	
 	void putQueryResult(String path, Object result);
 
 
@@ -131,13 +131,13 @@ public interface Parser<T> {
 	void onVerifyLogin() throws Exception;
 	void onVerifyContent() throws Exception;
 	void onVerifyRole(SQLConfig config) throws Exception;
-
+	
 	JSONObject executeSQL(SQLConfig config, boolean isSubquery) throws Exception;
-
+	
 	SQLExecutor getSQLExecutor();
 	Verifier<T> getVerifier();
-
-
+	
+	
 	Boolean getGlobleFormat();
 	RequestRole getGlobleRole();
 	String getGlobleDatabase();
@@ -145,10 +145,10 @@ public interface Parser<T> {
 	Boolean getGlobleExplain();
 	String getGlobleCache();
 
-
+	
 	int getTransactionIsolation();
 	void setTransactionIsolation(int transactionIsolation);
-
+	
 	void begin(int transactionIsolation);
 	void rollback() throws SQLException;
 	void rollback(Savepoint savepoint) throws SQLException;

@@ -21,7 +21,7 @@ import com.alibaba.fastjson.annotation.JSONField;
  * @author Lemon
  */
 public class Subquery {
-
+	
 	private String path; // []/0/User
 	private String originKey; //id{}@
 	private JSONObject originValue; // { "from": "Comment", "Comment": {...} }
@@ -30,7 +30,7 @@ public class Subquery {
 	private String range; // any, all
 	private String key; //id{}
 	private SQLConfig config;
-
+	
 	@JSONField(serialize = false) //解决泄漏 SQLConfig 里的 dbPassword 等
 	public String getPath() {
 		return path;
@@ -38,7 +38,7 @@ public class Subquery {
 	public void setPath(String path) {
 		this.path = path;
 	}
-
+	
 	@JSONField(serialize = false) //解决泄漏 SQLConfig 里的 dbPassword 等
 	public String getOriginKey() {
 		return originKey;
@@ -46,7 +46,7 @@ public class Subquery {
 	public void setOriginKey(String originKey) {
 		this.originKey = originKey;
 	}
-
+	
 	@JSONField(serialize = false) //解决泄漏 SQLConfig 里的 dbPassword 等
 	public JSONObject getOriginValue() {
 		return originValue;
@@ -54,7 +54,7 @@ public class Subquery {
 	public void setOriginValue(JSONObject originValue) {
 		this.originValue = originValue;
 	}
-
+	
 	@JSONField(serialize = false) //解决泄漏 SQLConfig 里的 dbPassword 等
 	public String getFrom() {
 		return from;
@@ -62,7 +62,7 @@ public class Subquery {
 	public void setFrom(String from) {
 		this.from = from;
 	}
-
+	
 	@JSONField(serialize = false) //解决泄漏 SQLConfig 里的 dbPassword 等
 	public String getRange() {
 		return range;
@@ -70,7 +70,7 @@ public class Subquery {
 	public void setRange(String range) {
 		this.range = range;
 	}
-
+	
 	@JSONField(serialize = false) //解决泄漏 SQLConfig 里的 dbPassword 等
 	public String getKey() {
 		return key;
@@ -78,7 +78,7 @@ public class Subquery {
 	public void setKey(String key) {
 		this.key = key;
 	}
-
+	
 	@JSONField(serialize = false) //解决泄漏 SQLConfig 里的 dbPassword 等
 	public SQLConfig getConfig() {
 		return config;
@@ -87,6 +87,6 @@ public class Subquery {
 		this.config = config;
 	}
 
-
+	
 
 }

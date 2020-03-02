@@ -87,14 +87,14 @@ public class JSONRequest extends JSONObject {
 	public static final int QUERY_TABLE = 0;
 	public static final int QUERY_TOTAL = 1;
 	public static final int QUERY_ALL = 2;
-
+	
 	public static final String QUERY_TABLE_STRING = "TABLE";
 	public static final String QUERY_TOTAL_STRING = "TOTAL";
 	public static final String QUERY_ALL_STRING = "ALL";
 
 	public static final String SUBQUERY_RANGE_ALL = "ALL";
 	public static final String SUBQUERY_RANGE_ANY = "ANY";
-
+	
 	public static final String KEY_QUERY = "query";
 	public static final String KEY_COUNT = "count";
 	public static final String KEY_PAGE = "page";
@@ -137,7 +137,7 @@ public class JSONRequest extends JSONObject {
 	public JSONRequest setPage(int page) {
 		return puts(KEY_PAGE, page);
 	}
-
+	
 	/**set joins of Main Table and it's Vice Tables in Array layer
 	 * @param joins "@/User/id@", "&/User/id@,>/Comment/momentId@" ...
 	 * @return
@@ -145,7 +145,7 @@ public class JSONRequest extends JSONObject {
 	public JSONRequest setJoin(String... joins) {
 		return puts(KEY_JOIN, StringUtil.getString(joins));
 	}
-
+	
 	/**set range for Subquery
 	 * @param range
 	 * @return
@@ -155,7 +155,7 @@ public class JSONRequest extends JSONObject {
 	public JSONRequest setSubqueryRange(String range) {
 		return puts(KEY_SUBQUERY_RANGE, range);
 	}
-
+	
 	/**set from for Subquery
 	 * @param range
 	 * @return
@@ -163,7 +163,7 @@ public class JSONRequest extends JSONObject {
 	public JSONRequest setSubqueryFrom(String from) {
 		return puts(KEY_SUBQUERY_FROM, from);
 	}
-
+	
 	//array object >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
