@@ -464,7 +464,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		}
 
 		if (StringUtil.isEmpty(tag, true)) {
-			throw new IllegalArgumentException("请在最外层设置 tag ！一般是 Table 名，例如 \"tag\": \"User\" ");
+			throw new IllegalArgumentException("请在最外层传 tag ！一般是 Table 名，例如 \"tag\": \"User\" ");
 		}
 
 		//获取指定的JSON结构 <<<<<<<<<<<<
@@ -475,17 +475,28 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		} catch (Exception e) {
 			error = e.getMessage();
 		}
-		if (object == null) {//empty表示随意操作  || object.isEmpty()) {
-			throw new UnsupportedOperationException("非开放请求必须是后端 Request 表中校验规则允许的操作！\n " + error);
+		if (object == null) { //empty表示随意操作  || object.isEmpty()) {
+			throw new UnsupportedOperationException("找不到 version: " + version + ", method: " + method.name() + ", tag: " + tag + " 对应的 structure ！"
+					+ "非开放请求必须是后端 Request 表中校验规则允许的操作！\n " + error + "\n如果需要则在 Request 表中新增配置！");
 		}
 
-		JSONObject target = null;
-		if (apijson.JSONObject.isTableKey(tag) && object.containsKey(tag) == false) {//tag是table名
-			target = new JSONObject(true);
-			target.put(tag, object);
-		} else {
-			target = object;
+		JSONObject target = object;
+		if (object.containsKey(tag) == false) { //tag 是 Table 名或 Table[]
+			
+			boolean isArrayKey = tag.endsWith(":[]");  //  JSONRequest.isArrayKey(tag);
+			String key = isArrayKey ? tag.substring(0, tag.length() - 3) : tag;
+			
+			if (apijson.JSONObject.isTableKey(key)) {
+				if (isArrayKey) { //自动为 tag = Comment:[] 的 { ... } 新增键值对 "Comment[]":[] 为 { "Comment[]":[], ... }
+					target.put(key + "[]", new JSONArray()); 
+				}
+				else { //自动为 tag = Comment 的 { ... } 包一层为 { "Comment": { ... } }
+					target = new JSONObject(true);
+					target.put(tag, object);
+				}
+			}
 		}
+		
 		//获取指定的JSON结构 >>>>>>>>>>>>>>
 
 		//JSONObject clone 浅拷贝没用，Structure.parse 会导致 structure 里面被清空，第二次从缓存里取到的就是 {}
@@ -511,9 +522,13 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		if (object == null) {
 			object = new JSONObject(true);
 		}
+		if (object.containsKey(JSONResponse.KEY_OK) == false) {
+			object.put(JSONResponse.KEY_OK, JSONResponse.isSuccess(code));
+		}
 		if (object.containsKey(JSONResponse.KEY_CODE) == false) {
 			object.put(JSONResponse.KEY_CODE, code);
 		}
+		
 		String m = StringUtil.getString(object.getString(JSONResponse.KEY_MSG));
 		if (m.isEmpty() == false) {
 			msg = m + " ;\n " + StringUtil.getString(msg);
@@ -738,9 +753,29 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 						int index = parentPath.lastIndexOf("]/");
 						if (index >= 0) {
 							int total = rp.getIntValue(JSONResponse.KEY_COUNT);
-							putQueryResult(parentPath.substring(0, index) + "]/" + JSONResponse.KEY_TOTAL, total);
+							
+							String pathPrefix = parentPath.substring(0, index) + "]/";
+							putQueryResult(pathPrefix + JSONResponse.KEY_TOTAL, total);
+							
+							//详细的分页信息，主要为 PC 端提供
+							int count = arrayConfig.getCount();
+							int page = arrayConfig.getPage();
+							int max = (int) ((total - 1)/count);
+							if (max < 0) {
+								max = 0;
+							}
+							
+							JSONObject pagination = new JSONObject(true);
+							pagination.put(JSONResponse.KEY_TOTAL, total);
+							pagination.put(JSONRequest.KEY_COUNT, count);
+							pagination.put(JSONRequest.KEY_PAGE, page);
+							pagination.put(JSONResponse.KEY_MAX, max);
+							pagination.put(JSONResponse.KEY_MORE, page < max);
+							pagination.put(JSONResponse.KEY_FIRST, page == 0);
+							pagination.put(JSONResponse.KEY_LAST, page == max);
+							putQueryResult(pathPrefix + JSONResponse.KEY_INFO, pagination);
 
-							if (total <= arrayConfig.getCount()*arrayConfig.getPage()) {
+							if (total <= count*page) {
 								query = JSONRequest.QUERY_TOTAL;//数量不够了，不再往后查询
 							}
 						}
@@ -1032,7 +1067,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			j.setTargetKey(targetKey);
 			j.setKeyAndType(key);
 			j.setRequest(getJoinObject(table, tableObj, key));
-			j.setOutter((JSONObject) e.getValue());
+			j.setOuter((JSONObject) e.getValue());
 
 			joinList.add(j);
 

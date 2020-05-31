@@ -357,12 +357,14 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				Log.i(TAG, "onParse targetPath = " + targetPath + "; target = " + target);
 
 				if (target == null) {//String#equals(null)会出错
-					Log.d(TAG, "onParse  target == null  >>  continue;");
+					Log.d(TAG, "onParse  target == null  >>  return true;");
 					return true;
 				}
 				if (target instanceof Map) { //target可能是从requestObject里取出的 {}
-					Log.d(TAG, "onParse  target instanceof Map  >>  continue;");
-					return false;
+					if (isTable || targetPath.endsWith("[]/" + JSONResponse.KEY_INFO) == false) {
+						Log.d(TAG, "onParse  target instanceof Map  >>  return false;");
+						return false; //FIXME 这个判断现在来看是否还有必要？为啥不允许为 JSONObject ？以前可能因为防止二次遍历再解析，现在只有一次遍历
+					}
 				}
 				if (targetPath.equals(target)) {//必须valuePath和保证getValueByPath传进去的一致！
 					Log.d(TAG, "onParse  targetPath.equals(target)  >>");
@@ -373,7 +375,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 								+ " || JSONRequest.TABLE_KEY_LIST.contains(key)) >>  return null;");
 						return false;//获取不到就不用再做无效的query了。不考虑 Table:{Table:{}}嵌套
 					} else {
-						Log.d(TAG, "onParse  isTable(table) == false >> continue;");
+						Log.d(TAG, "onParse  isTable(table) == false >> return true;");
 						return true;//舍去，对Table无影响
 					}
 				} 
@@ -467,19 +469,20 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			child = parser.onArrayParse(value, path, key, isSubquery);
 			isEmpty = child == null || ((JSONArray) child).isEmpty();
 		}
-		else {//APIJSON Object
+		else { //APIJSON Object
 			boolean isTableKey = JSONRequest.isTableKey(Pair.parseEntry(key, true).getKey());
 			if (type == TYPE_ITEM && isTableKey == false) {
 				throw new IllegalArgumentException(parentPath + "/" + key + ":{} 不合法！"
 						+ "数组 []:{} 中每个 key:{} 都必须是表 TableKey:{} 或 数组 arrayKey[]:{} ！");
 			}
 
-			if (//避免使用 "test":{"Test":{}} 绕过限制，实现查询爆炸   isTableKey && 
+			if ( //避免使用 "test":{"Test":{}} 绕过限制，实现查询爆炸   isTableKey && 
 					(arrayConfig == null || arrayConfig.getPosition() == 0)) {
 				objectCount ++;
 				int maxObjectCount = parser.getMaxObjectCount();
-				if (objectCount > maxObjectCount) {
-					throw new IllegalArgumentException(path + " 内截至 " + key + ":{} 时对象 key:{} 的数量达到 " + objectCount + " 已超限，必须在 0-" + maxObjectCount + " 内 !");
+				if (objectCount > maxObjectCount) {  //TODO 这里判断是批量新增/修改，然后上限为 maxUpdateCount
+					throw new IllegalArgumentException(path + " 内截至 " + key + ":{} 时对象"
+							+ " key:{} 的数量达到 " + objectCount + " 已超限，必须在 0-" + maxObjectCount + " 内 !");
 				}
 			}
 
@@ -573,6 +576,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		int version = parser.getVersion();
 		int maxUpdateCount = parser.getMaxUpdateCount();
 
+		String idKey = parser.createSQLConfig().getIdKey(); //Table[]: [{}] arrayConfig 为 null
 		for (int i = 0; i < valueArray.size(); i++) { //只要有一条失败，则抛出异常，全部失败
 			//TODO 改成一条多 VALUES 的 SQL 性能更高，报错也更会更好处理，更人性化
 			JSONObject item;
@@ -596,14 +600,14 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			}
 
 			allCount += count;
-			ids.add(result.get(JSONResponse.KEY_ID));
+			ids.add(result.get(idKey));
 		}
 
 		JSONObject allResult = AbstractParser.newSuccessResult();
-		allResult.put(JSONResponse.KEY_ID_IN, ids);
 		allResult.put(JSONResponse.KEY_COUNT, allCount);
+		allResult.put(idKey + "[]", ids);
 
-		response.put(key, allResult); //不按原样返回，避免数据量过大
+		response.put(childKey, allResult); //不按原样返回，避免数据量过大
 	}
 
 

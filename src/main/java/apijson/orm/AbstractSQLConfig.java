@@ -26,6 +26,7 @@ import static apijson.JSONObject.KEY_ID;
 import static apijson.JSONObject.KEY_JSON;
 import static apijson.JSONObject.KEY_ORDER;
 import static apijson.JSONObject.KEY_ROLE;
+import static apijson.JSONObject.KEY_RAW;
 import static apijson.JSONObject.KEY_SCHEMA;
 import static apijson.JSONObject.KEY_USER_ID;
 import static apijson.RequestMethod.DELETE;
@@ -86,6 +87,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 */
 	public static final Map<String, String> TABLE_KEY_MAP;
 	public static final List<String> DATABASE_LIST;
+	// 自定义where条件拼接
+	public static final Map<String, String> RAW_MAP;
 	static {
 		TABLE_KEY_MAP = new HashMap<String, String>();
 		TABLE_KEY_MAP.put(Table.class.getSimpleName(), Table.TABLE_NAME);
@@ -101,6 +104,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		DATABASE_LIST.add(DATABASE_POSTGRESQL);
 		DATABASE_LIST.add(DATABASE_SQLSERVER);
 		DATABASE_LIST.add(DATABASE_ORACLE);
+		DATABASE_LIST.add(DATABASE_DB2);
+
+		RAW_MAP = new HashMap<>();
 	}
 
 	@Override
@@ -294,6 +300,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public static boolean isOracle(String db) {
 		return DATABASE_ORACLE.equals(db);
 	}
+	@Override
+	public boolean isDb2() {
+		return isDb2(getSQLDatabase());
+	}
+	public static boolean isDb2(String db) {
+		return DATABASE_DB2.equals(db);
+	}
 
 	@Override
 	public String getQuote() {
@@ -417,7 +430,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					continue;
 				}
 
-				cfg = j.isLeftOrRightJoin() ? j.getOutterConfig() : j.getJoinConfig();
+				cfg = j.isLeftOrRightJoin() ? j.getOuterConfig() : j.getJoinConfig();
 				if (StringUtil.isEmpty(cfg.getAlias(), true)) {
 					cfg.setAlias(cfg.getTable());
 				}
@@ -479,7 +492,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					continue;
 				}
 
-				cfg = j.isLeftOrRightJoin() ? j.getOutterConfig() : j.getJoinConfig();
+				cfg = j.isLeftOrRightJoin() ? j.getOuterConfig() : j.getJoinConfig();
 				if (StringUtil.isEmpty(cfg.getAlias(), true)) {
 					cfg.setAlias(cfg.getTable());
 				}
@@ -589,7 +602,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					continue;
 				}
 
-				cfg = j.isLeftOrRightJoin() ? j.getOutterConfig() : j.getJoinConfig();
+				cfg = j.isLeftOrRightJoin() ? j.getOuterConfig() : j.getJoinConfig();
 				if (StringUtil.isEmpty(cfg.getAlias(), true)) {
 					cfg.setAlias(cfg.getTable());
 				}
@@ -605,8 +618,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 
 		String order = StringUtil.getTrimedString(getOrder());
+		// SELECT * FROM sys.Moment ORDER BY userId ASC, rand();   前面的 userId ASC 和后面的 rand() 都有效
+		//		if ("rand()".equals(order)) {
+		//			return (hasPrefix ? " ORDER BY " : "") + StringUtil.concat(order, joinOrder, ", ");
+		//		}
 
-		if (getCount() > 0 && (isOracle() || isSQLServer())) { // Oracle 和 SQL Server 的 OFFSET 必须加 ORDER BY
+		if (getCount() > 0 && (isOracle() || isSQLServer() || isDb2())) { // Oracle, SQL Server, DB2 的 OFFSET 必须加 ORDER BY
 
 			//			String[] ss = StringUtil.split(order);
 			if (StringUtil.isEmpty(order, true)) {  //SQL Server 子查询内必须指定 OFFSET 才能用 ORDER BY
@@ -637,38 +654,37 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 
 
-		if (order.contains("+")) {//replace没有包含的replacement会崩溃
-			order = order.replaceAll("\\+", " ASC ");
-		}
-		if (order.contains("-")) {
-			order = order.replaceAll("-", " DESC ");
-		}
-
 		String[] keys = StringUtil.split(order);
 		if (keys == null || keys.length <= 0) {
 			return StringUtil.isEmpty(joinOrder, true) ? "" : (hasPrefix ? " ORDER BY " : "") + joinOrder;
 		}
 
-		String origin;
-		String sort;
-		int index;
 		for (int i = 0; i < keys.length; i++) {
-			index = keys[i].trim().endsWith(" ASC") ? keys[i].lastIndexOf(" ASC") : -1; //StringUtil.split返回数组中，子项不会有null
+			String item = keys[i];
+			if ("rand()".equals(item)) {
+				continue;
+			}
+
+			int index = item.endsWith("+") ? item.length() - 1 : -1; //StringUtil.split返回数组中，子项不会有null
+			String sort;
 			if (index < 0) {
-				index = keys[i].trim().endsWith(" DESC") ? keys[i].lastIndexOf(" DESC") : -1;
+				index = item.endsWith("-") ? item.length() - 1 : -1;
 				sort = index <= 0 ? "" : " DESC ";
-			} else {
+			}
+			else {
 				sort = " ASC ";
 			}
-			origin = index < 0 ? keys[i] : keys[i].substring(0, index);
+			
+			String origin = index < 0 ? item : item.substring(0, index);
 
 			if (isPrepared()) { //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
 				//这里既不对origin trim，也不对 ASC/DESC ignoreCase，希望前端严格传没有任何空格的字符串过来，减少传输数据量，节约服务器性能
 				if (StringUtil.isName(origin) == false) {
-					throw new IllegalArgumentException("预编译模式下 @order:value 中 value里面用 , 分割的每一项"
-							+ " column+ / column- 中 column必须是1个单词！并且不要有多余的空格！");
+					throw new IllegalArgumentException("预编译模式下 @order:value 中 " + item + " 不合法! value 里面用 , 分割的"
+							+ "每一项必须是 随机函数 rand() 或 column+ / column- 且其中 column 必须是 1 个单词！并且不要有多余的空格！");
 				}
 			}
+			
 			keys[i] = getKey(origin) + sort;
 		}
 
@@ -761,7 +777,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						continue;
 					}
 
-					ecfg = j.getOutterConfig();
+					ecfg = j.getOuterConfig();
 					if (ecfg != null && ecfg.getColumn() != null) { //优先级更高
 						cfg = ecfg;
 					}
@@ -1132,7 +1148,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (count <= 0 || RequestMethod.isHeadMethod(getMethod(), true)) {
 			return "";
 		}
-		return getLimitString(getPage(), getCount(), isOracle() || isSQLServer());
+		return getLimitString(getPage(), getCount(), isOracle() || isSQLServer() || isDb2());
 	}
 	/**获取限制数量
 	 * @param limit
@@ -1345,7 +1361,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (joinList != null) {
 
 			String newWs = "";
-			String ws = "" + whereString;
+			String ws = whereString;
 
 			List<Object> newPvl = new ArrayList<>();
 			List<Object> pvl = new ArrayList<>(preparedValueList);
@@ -1356,25 +1372,66 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			boolean changed = false;
 			//各种 JOIN 没办法统一用 & | ！连接，只能按优先级，和 @combine 一样?
 			for (Join j : joinList) {
-				switch (j.getJoinType()) {
+				String jt = j.getJoinType();
+				
+				switch (jt) {
+				case "*": // CROSS JOIN
 				case "@": // APP JOIN
 				case "<": // LEFT JOIN
 				case ">": // RIGHT JOIN
 					break;
 
-				case "":  // FULL JOIN 
-				case "|": // FULL JOIN  不支持 <>, [] ，避免太多符号
-				case "&": // INNER JOIN 
-				case "!": // OUTTER JOIN
-				case "^": // SIDE JOIN
-				case "*": // CROSS JOIN
+				case "&": // INNER JOIN: A & B 
+				case "":  // FULL JOIN: A | B 
+				case "|": // FULL JOIN: A | B 
+				case "!": // OUTER JOIN: ! (A | B)
+				case "^": // SIDE JOIN: ! (A & B)
+				case "(": // ANTI JOIN: A & ! B
+				case ")": // FOREIGN JOIN: B & ! A
 					jc = j.getJoinConfig();
 					boolean isMain = jc.isMain();
 					jc.setMain(false).setPrepared(isPrepared()).setPreparedValueList(new ArrayList<Object>());
 					js = jc.getWhereString(false);
 					jc.setMain(isMain);
 
+					boolean isOuterJoin = "!".equals(jt);
+					boolean isSideJoin = "^".equals(jt);
+					boolean isAntiJoin = "(".equals(jt);
+					boolean isForeignJoin = ")".equals(jt);
+					boolean isWsEmpty = StringUtil.isEmpty(ws, true);
+					
+					if (isWsEmpty) {
+						if (isOuterJoin) { // ! OUTER JOIN: ! (A | B)
+							throw new NotExistException("no result for ! OUTER JOIN( ! (A | B) ) when A or B is empty!");
+						}
+						if (isForeignJoin) { // ) FOREIGN JOIN: B & ! A
+							throw new NotExistException("no result for ) FOREIGN JOIN( B & ! A ) when A is empty!");
+						}
+					}
+					
 					if (StringUtil.isEmpty(js, true)) {
+						if (isOuterJoin) { // ! OUTER JOIN: ! (A | B)
+							throw new NotExistException("no result for ! OUTER JOIN( ! (A | B) ) when A or B is empty!");
+						}
+						if (isAntiJoin) { // ( ANTI JOIN: A & ! B
+							throw new NotExistException("no result for ( ANTI JOIN( A & ! B ) when B is empty!");
+						}
+						
+						if (isWsEmpty) {
+							if (isSideJoin) {
+								throw new NotExistException("no result for ^ SIDE JOIN( ! (A & B) ) when both A and B are empty!");
+							}
+						}
+						else {
+							if (isSideJoin || isForeignJoin) {
+								newWs += " ( " + getCondition(true, ws) + " ) ";
+								
+								newPvl.addAll(pvl);
+								newPvl.addAll(jc.getPreparedValueList());
+								changed = true;
+							}
+						}
+						
 						continue;
 					}
 
@@ -1382,36 +1439,42 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						newWs += AND;
 					}
 
-					if ("^".equals(j.getJoinType())) { // (A & ! B) | (B & ! A)
-						newWs += " (   ( " + ws + ( StringUtil.isEmpty(ws, true) ? "" : AND + NOT ) + " ( " + js + " ) ) "
-								+ OR
-								+ " ( " + js + AND + NOT + " ( " + ws + " )  )   ) ";
-
-						newPvl.addAll(pvl);
-						newPvl.addAll(jc.getPreparedValueList());
-						newPvl.addAll(jc.getPreparedValueList());
-						newPvl.addAll(pvl);
+					if (isAntiJoin) { // ( ANTI JOIN: A & ! B  
+						newWs += " ( " + ( isWsEmpty ? "" : ws + AND ) + NOT + " ( " + js + " ) " + " ) ";
 					}
-					else {
-						logic = Logic.getType(j.getJoinType());
-
+					else if (isForeignJoin) { // ) FOREIGN JOIN: B & ! A
+						newWs += " ( " + " ( " + js + " ) " + ( isWsEmpty ? "" : AND + NOT + ws ) + " ) ";
+					}
+					else if (isSideJoin) { // ^ SIDE JOIN:  ! (A & B)
+						//MySQL 因为 NULL 值处理问题，(A & ! B) | (B & ! A) 与 ! (A & B) 返回结果不一样，后者往往更多
+						newWs += " ( " + getCondition(
+								true, 
+								( isWsEmpty ? "" : ws + AND ) + " ( " + js + " ) "
+								) + " ) ";
+					}
+					else {  // & INNER JOIN: A & B; | FULL JOIN: A | B; OUTER JOIN: ! (A | B)
+						logic = Logic.getType(jt);
 						newWs += " ( "
 								+ getCondition(
 										Logic.isNot(logic), 
 										ws
-										+ ( StringUtil.isEmpty(ws, true) ? "" : (Logic.isAnd(logic) ? AND : OR) )
+										+ ( isWsEmpty ? "" : (Logic.isAnd(logic) ? AND : OR) )
 										+ " ( " + js + " ) "
 										)
 								+ " ) ";
-
-						newPvl.addAll(pvl);
-						newPvl.addAll(jc.getPreparedValueList());
 					}
+
+					newPvl.addAll(pvl);
+					newPvl.addAll(jc.getPreparedValueList());
 
 					changed = true;
 					break;
 				default:
-					throw new UnsupportedOperationException("join:value 中 value 里的 " + j.getJoinType() + "/" + j.getPath() + "错误！不支持 " + j.getJoinType() + " 等 [@ APP, < LEFT, > RIGHT, | FULL, & INNER, ! OUTTER, ^ SIDE, * CROSS] 之外的JOIN类型 !");
+					throw new UnsupportedOperationException(
+							"join:value 中 value 里的 " + jt + "/" + j.getPath()
+							+ "错误！不支持 " + jt + " 等 [ @ APP, < LEFT, > RIGHT, * CROSS"
+							+ ", & INNER, | FULL, ! OUTER, ^ SIDE, ( ANTI, ) FOREIGN ] 之外的 JOIN 类型 !"
+					);
 				}
 			}
 
@@ -1421,7 +1484,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			}
 		}
 
-		String s = whereString.isEmpty() ? "" : (hasPrefix ? " WHERE " : "") + whereString;
+		String s = StringUtil.isEmpty(whereString, true) ? "" : (hasPrefix ? " WHERE " : "") + whereString;
 
 		if (s.isEmpty() && RequestMethod.isQueryMethod(method) == false) {
 			throw new UnsupportedOperationException("写操作请求必须带条件！！！");
@@ -1442,7 +1505,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			, RequestMethod method, boolean verifyName) throws Exception {
 		Log.d(TAG, "getWhereItem  key = " + key);
 		//避免筛选到全部	value = key == null ? null : where.get(key);
-		if (key == null || value == null || key.startsWith("@") || key.endsWith("()")) {//关键字||方法, +或-直接报错
+		if (key == null || value == null || key.endsWith("()")
+				|| (key.startsWith("@") && KEY_RAW.equals(key) == false)) { //关键字||方法, +或-直接报错
 			Log.d(TAG, "getWhereItem  key == null || value == null"
 					+ " || key.startsWith(@) || key.endsWith(()) >> continue;");
 			return null;
@@ -1483,7 +1547,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		else if (key.endsWith("<")) {
 			keyType = 10;
 		}
-		else { //else绝对不能省，避免再次踩坑！ keyType = 0; 写在for循环外面都没注意！
+		else if (key.startsWith("@")) {
+			keyType = 11;
+		} else { //else绝对不能省，避免再次踩坑！ keyType = 0; 写在for循环外面都没注意！
 			keyType = 0;
 		}
 		key = getRealKey(method, key, false, true, verifyName, getQuote());
@@ -1510,11 +1576,31 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			return getCompareString(key, value, ">");
 		case 10:
 			return getCompareString(key, value, "<");
+		case 11:
+			return getRaw(key,value);
 		default: //TODO MySQL JSON类型的字段对比 key='[]' 会无结果！ key LIKE '[1, 2, 3]'  //TODO MySQL , 后面有空格！
 			return getEqualString(key, value);
 		}
 	}
 
+	@JSONField(serialize = false)
+	public String getRaw(String key, Object value) throws Exception {
+		if (JSON.isBooleanOrNumberOrString(value) == false && value instanceof Subquery == false) {
+			throw new IllegalArgumentException(key + ":value 中value不合法！非PUT请求只支持 [Boolean, Number, String] 内的类型 ！");
+		}
+
+		String[] rawList = ((String)value).split(",");
+		String whereItem = "";
+		for (int i = 0; i < rawList.length; i++) {
+			if(rawList.length>1&& i!=0){
+				whereItem += " and " + RAW_MAP.get(rawList[i]);
+			}else{
+				whereItem += RAW_MAP.get(rawList[i]);
+			}
+		}
+
+		return whereItem;
+	}
 
 	@JSONField(serialize = false)
 	public String getEqualString(String key, Object value) throws Exception {
@@ -2041,7 +2127,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			String quote = getQuote();
 
 			boolean isFirst = true;
-			int keyType = 0;// 0 - =; 1 - +, 2 - -
+			int keyType;// 0 - =; 1 - +, 2 - -
 			Object value;
 
 			String idKey = getIdKey();
@@ -2055,6 +2141,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					keyType = 1;
 				} else if (key.endsWith("-")) {
 					keyType = 2;
+				} else {
+					keyType = 0; //注意重置类型，不然不该加减的字段会跟着加减
 				}
 				value = content.get(key);
 				key = getRealKey(method, key, false, true, verifyName, quote);
@@ -2244,6 +2332,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				if (j.isAppJoin()) { // APP JOIN，只是作为一个标记，执行完主表的查询后自动执行副表的查询 User.id IN($commentIdList)
 					continue;
 				}
+				String type = j.getJoinType();
 
 				//LEFT JOIN sys.apijson_user AS User ON User.id = Moment.userId， 都是用 = ，通过relateType处理缓存
 				// <"INNER JOIN User ON User.id = Moment.userId", UserConfig>  TODO  AS 放 getSQLTable 内
@@ -2259,35 +2348,41 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				//					tn = tn.toLowerCase();
 				//				}
 
-				switch (j.getJoinType()) { //TODO $ SELF JOIN
-				//				case "@": // APP JOIN
+				switch (type) {
+				//前面已跳过				case "@": // APP JOIN
 				//					continue;
 
+				case "*": // CROSS JOIN
+					onGetCrossJoinString(j);
 				case "<": // LEFT JOIN
 				case ">": // RIGHT JOIN
 					jc.setMain(true).setKeyPrefix(false);
-					sql = ( ">".equals(j.getJoinType()) ? " RIGHT" : " LEFT") + " JOIN ( " + jc.getSQL(isPrepared()) + " ) AS "
+					sql = ( "<".equals(type) ? " LEFT" : (">".equals(type) ? " RIGHT" : " CROSS") )
+							+ " JOIN ( " + jc.getSQL(isPrepared()) + " ) AS "
 							+ quote + jt + quote + " ON " + quote + jt + quote + "." + quote + j.getKey() + quote + " = "
 							+ quote + tn + quote + "." + quote + j.getTargetKey() + quote;
 					jc.setMain(false).setKeyPrefix(true);
-
-					//					preparedValueList.addAll(jc.getPreparedValueList());
 
 					pvl.addAll(jc.getPreparedValueList());
 					changed = true;
 					break;
 
-				case "":  // FULL JOIN 
-				case "|": // FULL JOIN  不支持 <>, [] ，避免太多符号
-				case "&": // INNER JOIN 
-				case "!": // OUTTER JOIN
-				case "^": // SIDE JOIN
-					//场景少且性能差，默认禁用	case "*": // CROSS JOIN
-					sql = ("*".equals(j.getJoinType()) ? " CROSS JOIN " : " INNER JOIN ") + jc.getTablePath()
+				case "&": // INNER JOIN: A & B 
+				case "":  // FULL JOIN: A | B 
+				case "|": // FULL JOIN: A | B 
+				case "!": // OUTER JOIN: ! (A | B)
+				case "^": // SIDE JOIN: ! (A & B)
+				case "(": // ANTI JOIN: A & ! B
+				case ")": // FOREIGN JOIN: B & ! A
+					sql = " INNER JOIN " + jc.getTablePath()
 					+ " ON " + quote + jt + quote + "." + quote + j.getKey() + quote + " = " + quote + tn + quote + "." + quote + j.getTargetKey() + quote;
 					break;
 				default:
-					throw new UnsupportedOperationException("join:value 中 value 里的 " + j.getJoinType() + "/" + j.getPath() + "错误！不支持 " + j.getJoinType() + " 等 [@ APP, < LEFT, > RIGHT, | FULL, & INNER, ! OUTTER, ^ SIDE, * CROSS] 之外的JOIN类型 !");
+					throw new UnsupportedOperationException(
+							"join:value 中 value 里的 " + jt + "/" + j.getPath()
+							+ "错误！不支持 " + jt + " 等 [ @ APP, < LEFT, > RIGHT, * CROSS"
+							+ ", & INNER, | FULL, ! OUTER, ^ SIDE, ( ANTI, ) FOREIGN ] 之外的 JOIN 类型 !"
+					);
 				}
 
 				joinOns += "  \n  " + sql;
@@ -2302,6 +2397,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 
 		return joinOns;
+	}
+
+	protected void onGetCrossJoinString(Join j) throws UnsupportedOperationException {
+		throw new UnsupportedOperationException("已禁用 * CROSS JOIN ！性能很差、需求极少，如要取消禁用可在后端重写相关方法！");
 	}
 
 	/**新建SQL配置
@@ -2490,7 +2589,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			String[] ws = StringUtil.split(combine);
 			if (ws != null) {
 				if (method == DELETE || method == GETS || method == HEADS) {
-					throw new IllegalArgumentException("DELETE,GETS,HEADS 请求不允许传 @combine:\"conditons\" !");
+					throw new IllegalArgumentException("DELETE,GETS,HEADS 请求不允许传 @combine:value !");
 				}
 				whereList = new ArrayList<>();
 
@@ -2534,8 +2633,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 						whereList.add(w);
 					}
-					if (request.containsKey(w) == false) {
-						throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里 " + ws[i] + " 对应的 " + w + " 不在它里面！");
+
+					// 可重写回调方法自定义处理 // 动态设置的场景似乎很少，而且去掉后不方便用户排错！//去掉判断，有时候不在没关系，如果是对增删改等非开放请求强制要求传对应的条件，可以用 Operation.NECESSARY
+					if (request.containsKey(w) == false) {  //和 request.get(w) == null 没区别，前面 Parser 已经过滤了 null
+						//	throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里 " + ws[i] + " 对应的 " + w + " 不在它里面！");
+						callback.onMissingKey4Combine(table, request, combine, ws[i], w);
 					}
 				}
 
@@ -2684,9 +2786,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				joinConfig.setMain(false).setKeyPrefix(true);
 
 				if (j.isLeftOrRightJoin()) {
-					SQLConfig outterConfig = newSQLConfig(method, table, alias, j.getOutter(), null, false, callback);
+					SQLConfig outterConfig = newSQLConfig(method, table, alias, j.getOuter(), null, false, callback);
 					outterConfig.setMain(false).setKeyPrefix(true).setDatabase(joinConfig.getDatabase()).setSchema(joinConfig.getSchema()); //解决主表 JOIN 副表，引号不一致
-					j.setOutterConfig(outterConfig);
+					j.setOuterConfig(outterConfig);
 				}
 			}
 
@@ -2832,7 +2934,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		 */
 		SQLConfig getSQLConfig(RequestMethod method, String database, String schema, String table);
 
-
 		/**为 post 请求新建 id， 只能是 Long 或 String
 		 * @param method
 		 * @param database
@@ -2857,6 +2958,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		 * @return
 		 */
 		String getUserIdKey(String database, String schema, String table);
+
+		/**combine 里的 key 在 request 中 value 为 null 或不存在，即 request 中缺少用来作为 combine 条件的 key: value
+		 * @param combine
+		 * @param key
+		 * @param request
+		 */
+		public void onMissingKey4Combine(String name, JSONObject request, String combine, String item, String key) throws Exception;
 	}
 
 	public static abstract class SimpleCallback implements Callback {
@@ -2875,6 +2983,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		@Override
 		public String getUserIdKey(String database, String schema, String table) {
 			return KEY_USER_ID;
+		}
+		
+		@Override
+		public void onMissingKey4Combine(String name, JSONObject request, String combine, String item, String key) throws Exception {
+			throw new IllegalArgumentException(name + ":{} 里的 @combine:value 中的value里 " + item + " 对应的条件 " + key + ":value 中 value 不能为 null！");
 		}
 
 	}
