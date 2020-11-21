@@ -1,6 +1,6 @@
 # apijson-orm  [![](https://jitpack.io/v/APIJSON/apijson-orm.svg)](https://jitpack.io/#APIJSON/apijson-orm)
-腾讯 [APIJSON](https://github.com/APIJSON/APIJSON) ORM 库，可通过 Maven, Gradle 等远程依赖。<br />
-Tencent [APIJSON](https://github.com/APIJSON/APIJSON) ORM library for remote dependencies with Maven, Gradle, etc.
+腾讯 [APIJSON](https://github.com/Tencent/APIJSON) ORM 库，可通过 Maven, Gradle 等远程依赖。<br />
+Tencent [APIJSON](https://github.com/Tencent/APIJSON) ORM library for remote dependencies with Maven, Gradle, etc.
 
 ### Maven
 #### 1. 在 pom.xml 中添加 JitPack 仓库
